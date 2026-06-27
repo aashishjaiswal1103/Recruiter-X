@@ -1,18 +1,14 @@
 # Dependencies
 node_modules/
-/frontend/node_modules/
 .pnp
 .pnp.js
 
 # Next.js Build and Output
 .next/
-/frontend/.next/
 out/
-/frontend/out/
 
 # Python Virtual Environments
 .venv/
-/backend/.venv/
 venv/
 ENV/
 env/
@@ -22,7 +18,6 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-/backend/__pycache__/
 
 # Environment Files (contains keys)
 .env
@@ -32,8 +27,6 @@ __pycache__/
 .env.production.local
 *.env
 *.env.local
-/backend/.env
-/frontend/.env.local
 
 # System Files
 .DS_Store
@@ -48,4 +41,4 @@ pnpm-debug.log*
 
 # TypeScript build info
 *.tsbuildinfo
-/frontend/next-env.d.ts
+next-env.d.ts
