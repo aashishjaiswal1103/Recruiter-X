@@ -137,21 +137,6 @@ Recruiter-X was built specifically to detect this inflation — not by catching 
 - **Technical comfort:** Medium. Will use the platform but won't configure APIs.
 - **Usage pattern:** Daily active user. 50–200 resumes per week.
 
-### Persona 3 — Sofia, the VP of Talent (Decision Maker / Buyer)
-
-- **Role:** VP Talent at 1,200-person company, manages team of 6 recruiters
-- **Pain:** Inconsistent evaluation quality across her team. No data on pool health.
-- **Need:** Standardized evaluation framework. Pool intelligence reports. Audit trail.
-- **Technical comfort:** Low on technical tooling, high on data interpretation.
-- **Usage pattern:** Reviews pool health reports weekly. Views aggregated team analytics.
-
-### Persona 4 — Lena, the Compliance Lead (Stakeholder / Blocker)
-
-- **Role:** Legal/Compliance at EU-based company
-- **Pain:** AI-assisted hiring triggers GDPR Article 22 and EU AI Act obligations
-- **Need:** Full audit logs, explainability, no automated decision-making
-- **Technical comfort:** N/A — she reviews documentation, not the tool
-- **Usage pattern:** Reviews data processing agreements, audit exports
 
 ---
 
@@ -218,7 +203,7 @@ Step 3 — Add API key (mandatory before first analysis)
          └── Validate key is active with test call
 Step 4 — Create first project (guided)
 Step 5 — Upload first JD (guided with inline tips)
-Step 6 — View sample output (pre-loaded demo data)
+Step 6 — View jd output (best jd , ghost profile)
 Step 7 — Upload real resumes
 ```
 
