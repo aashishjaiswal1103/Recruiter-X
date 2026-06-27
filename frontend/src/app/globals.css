@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Mono:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-blue: #0000FF;
+  --color-blue-dim: #0000CC;
+  --color-blue-light: #F0F4FF;
+  --bg-base: #FFFFFF;
+  --bg-subtle: #FAFAFA;
+  
+  --color-navy: #000022;
+  --color-navy-soft: #00003A;
+  --color-cream: #FFF5EC;
+  --color-peach: #FCE9D7;
+  
+  --text-primary: #0A0A0A;
+  --text-secondary: #4A4A4A;
+  --text-tertiary: #8C8C8C;
+  --text-on-navy: #FFFFFF;
+
+  /* Semantic Colors */
+  --color-danger: #D4382C;
+  --color-danger-bg: #FFF5F5;
+  --color-warning: #C47D10;
+  --color-warning-bg: #FFFBF0;
+  --color-success: #2D8A4E;
+  --color-success-bg: #F0FDF4;
+}
+
+body {
+  color: var(--text-primary);
+  background-color: var(--bg-base);
+  font-family: 'Space Mono', monospace;
+  overflow-x: hidden;
+}
+
+/* Custom Selection Highlight */
+::selection {
+  background: var(--color-blue-light);
+  color: var(--color-blue);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+::-webkit-scrollbar-thumb {
+  background: #E5E5E5;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-blue-light);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Terminal Scanlines Effect */
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+.terminal-scanlines::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  z-index: 2;
+  background-size: 100% 4px, 6px 100%;
+  pointer-events: none;
+}
+
