@@ -1,0 +1,84 @@
+# Recruiter-X Backend Status & TODO List
+
+This document acts as the master checklist of all backend features, detailing what has been successfully built and what remains to be implemented.
+
+---
+
+## 1. Environment & Setup
+
+- [x] **Project Structure Setup**: Created `api/`, `frontend/`, `workers/`, `docs/` directories.
+- [x] **FastAPI Foundation**: [index.py](file:///d:/2026/college%20pro/hack/api/index.py) configured with standard logs, health check, and CORS configuration.
+- [x] **Configuration Loading**: [config.py](file:///d:/2026/college%20pro/hack/api/config.py) configured to load credentials and variables via Pydantic from `.env`.
+- [x] **Dependency Specification**: `requirements.txt` listing all Python packages.
+- [x] **Celery App Configuration**: [celery_app.py](file:///d:/2026/college%20pro/hack/api/celery_app.py) initialized with priority task queues and rate limit definitions.
+- [x] **Docker Compose Runner**: `docker-compose.yml` for running local redis, API, and workers in development.
+
+---
+
+## 2. Database Schema & Supabase Integration
+
+- [x] **Schema Definition**: [schema.sql](file:///d:/2026/college%20pro/hack/api/database/schema.sql) defining tables, indexes, and custom enum types.
+- [x] **Row-Level Security (RLS)**: Policies written for isolation of organization/tenant data in the SQL schema.
+- [x] **Supabase Client Setup**: [supabase_client.py](file:///d:/2026/college%20pro/hack/api/services/supabase_client.py) service-role client initialized to bypass RLS for background processes.
+- [ ] **Schema Migration**: Execute [schema.sql](file:///d:/2026/college%20pro/hack/api/database/schema.sql) script on the live Supabase PostgreSQL instance.
+- [ ] **Private Storage Bucket Setup**: Provision a private bucket for resume file uploads and configure signed URL access.
+
+---
+
+## 3. Core LLM Clients & Layer
+
+- [x] **Standard Client Clients**: 
+  - [Gemini Client](file:///d:/2026/college%20pro/hack/api/llm/providers/gemini.py) supporting structured JSON output via `generate_content_async`.
+  - [OpenAI Client](file:///d:/2026/college%20pro/hack/api/llm/providers/openai.py) supporting Pydantic parsing natively.
+  - [Anthropic Client](file:///d:/2026/college%20pro/hack/api/llm/providers/anthropic.py) enforcing structure via tools calling overrides.
+- [x] **LLM Router**: [router.py](file:///d:/2026/college%20pro/hack/api/llm/router.py) managing token budget validation, default temperature settings by task type, client orchestration, and response schema parsing.
+- [x] **Error Normalization**: Custom exceptions in [errors.py](file:///d:/2026/college%20pro/hack/api/utils/errors.py) catching and mapping diverse API provider exceptions (timeouts, rate limits, authentication issues).
+
+---
+
+## 4. LLM Prompts & Schemas
+
+- [x] **Evaluation Schemas**: Defined Pydantic schema constraints under [schemas/](file:///d:/2026/college%20pro/hack/api/llm/schemas) for:
+  - JD Audit (`jd_audit_schema.py`)
+  - Ghost Candidate (`ghost_candidate_schema.py`)
+  - Trajectory (`trajectory_schema.py`)
+  - Behaviour (`behaviour_schema.py`)
+  - Credibility (`credibility_schema.py`)
+  - Insider Signals (`insider_signal_schema.py`)
+  - Ghost Comparison (`ghost_comparison_schema.py`)
+  - Interrogation (`interrogation_schema.py`)
+- [x] **Evaluation Prompts**: Defined system and user prompt blueprints under [prompts/](file:///d:/2026/college%20pro/hack/api/llm/prompts) for each component.
+
+---
+
+## 5. Advanced AI Reasoning Engine
+
+- [x] **Semantic Router**: Classifies incoming query strings to resolve target specialist agents.
+- [x] **Self-Reflection (Reflector)**: Logic to critique drafts and run correction passes for logical errors.
+- [x] **Tree of Thought (ToT) Explorer**: Generates three parallel evaluation pathways and scores/picks the best candidate path.
+- [x] **Mixture of Agents (MoA) Orchestrator**: Executes Trajectory, Behaviour, Credibility, and Insider Signal analyzers in parallel and merges them using the Ghost Comparator.
+- [x] **Prompt Engine Interface**: Unified [PromptEngine](file:///d:/2026/college%20pro/hack/api/llm/engine.py#L297) class exposed for clean execution.
+
+---
+
+## 6. Pending Pipelines & Business Logic
+
+- [ ] **Resume Ingestion Pipeline**: Implement document text extraction parsing for `.pdf` (using `pdfplumber`), `.docx` (using `python-docx`), and scanned image fallback OCR (`pytesseract`).
+- [ ] **BYOK Key Management**: Write AES-256-GCM encryption/decryption utilities using PyCryptodome (or cryptography) to securely store LLM API keys in the database.
+- [ ] **Celery Tasks Execution**: Wrap parsing, evaluations, and reports into asynchronous tasks. The `workers/` directory is currently empty.
+- [ ] **Score Fusion & Ranking Engine**: Write mathematical scoring script applying slider weight presets, subtracting penalties for red flags, and performing the diversity reshuffle.
+- [ ] **Pool Health Aggregator**: Write aggregation script to generate cohort metadata (average inflation, top missing skills, qualification rate) once all candidates are processed.
+
+---
+
+## 7. API Routing & Security Middleware
+
+- [ ] **Auth Middleware**: Write JWT authentication middleware verifying Supabase credentials on requests.
+- [ ] **REST Endpoints**:
+  - `POST /api/v1/projects` (Create project, select BYOK key, audit JD, generate Ghost candidate).
+  - `POST /api/v1/projects/{id}/resumes` (Batch resume upload endpoint triggering Celery queue tasks).
+  - `GET /api/v1/projects/{id}/candidates` (Fetch ranked candidates with real-time scoring data).
+  - `GET /api/v1/projects/{id}/dashboard` (Retrieve Pool Health cohort metrics).
+  - `GET /api/v1/projects/{id}/export` (Generate ranked candidate CSV).
+- [ ] **Global Error Handler**: Add FastAPI exception handlers mapping HTTP exceptions globally and hiding internal stack traces in production.
+- [ ] **Security Auditing & Logging**: Masks sensitive parameters (like API keys) in trace logs and populates `audit_logs` database entries on user actions.
