@@ -63,15 +63,16 @@ recruiter-x/
 - [x] Establish the root `brain.md` context keeper.
 
 ### Phase 2: Database Schema & Migration
-- [ ] Initialize Supabase Postgres tables (`organisations`, `api_keys`, `projects`, `candidates`, `analysis_jobs`, `audit_logs`).
-- [ ] Configure PostgreSQL Row-Level Security (RLS) policies for tenant isolation.
-- [ ] Set up performance indexes.
-- [ ] Create private storage bucket for candidate resumes.
+- [x] Initialize Supabase Postgres tables (`organisations`, `api_keys`, `projects`, `candidates`, `analysis_jobs`, `audit_logs`).
+- [x] Configure PostgreSQL Row-Level Security (RLS) policies for tenant isolation.
+- [x] Set up performance indexes.
+- [x] Create private storage bucket for candidate resumes.
 
 ### Phase 3: Core Backend Features (FastAPI & Celery)
-- [ ] Implement Auth middleware & JWT verification (Supabase).
+- [x] Implement Auth middleware & JWT verification (Supabase).
+- [x] Create LLM Router for Gemini, Claude, and OpenAI with structured output mapping.
+- [x] Implement Advanced AI Reasoning Engine (Semantic Router, Self-Reflection, Tree of Thought, Mixture of Agents).
 - [ ] Implement BYOK Key Management (AES-256-GCM encryption/decryption).
-- [ ] Create LLM Router for Gemini, Claude, and OpenAI with structured output mapping.
 - [ ] Build resume parsing and text extraction pipeline (PDF, Docx, scanned OCR fallbacks).
 - [ ] Write Celery analysis tasks (Trajectory, Behaviour, Red Flags, Interrogation).
 
@@ -108,5 +109,8 @@ Key tables:
 - Moved all reference documentation into `docs/`.
 - Bootstrapped Next.js 14 frontend and installed libraries.
 - Bootstrapped python `.venv` virtual environment in `backend/` and installed libraries.
-- Created `docker-compose.yml`, `celery_app.py`, and `.env` template files.
 - Configured custom Design System tokens in Tailwind.
+- Implemented and verified the Supabase PostgreSQL database schema with RLS policies, indexing, and migration utility.
+- Created robust LLM client integrations (OpenAI, Gemini, Anthropic) with token budgeting and error normalization.
+- Built the Advanced AI Reasoning Engine (Semantic Routing, Self-Reflection, Tree-of-Thought, and Mixture-of-Agents).
+- Implemented and verified JWT and role-checking authentication middleware with passing unit tests.

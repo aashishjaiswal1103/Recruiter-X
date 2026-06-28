@@ -20,8 +20,8 @@ This document acts as the master checklist of all backend features, detailing wh
 - [x] **Schema Definition**: [schema.sql](file:///d:/2026/college%20pro/hack/api/database/schema.sql) defining tables, indexes, and custom enum types.
 - [x] **Row-Level Security (RLS)**: Policies written for isolation of organization/tenant data in the SQL schema.
 - [x] **Supabase Client Setup**: [supabase_client.py](file:///d:/2026/college%20pro/hack/api/services/supabase_client.py) service-role client initialized to bypass RLS for background processes.
-- [x] **Schema Migration**: Created [migrate_db.py](file:///Users/disha/Desktop/Recruiter-X/api/scratch/migrate_db.py) to automate raw schema script execution on the database (configure DATABASE_URL in `api/.env` and execute).
-- [x] **Private Storage Bucket Setup**: Integrated bucket provisioning via Supabase SDK into [migrate_db.py](file:///Users/disha/Desktop/Recruiter-X/api/scratch/migrate_db.py) (configure SUPABASE_URL and SUPABASE_SERVICE_KEY in `api/.env` and execute).
+- [x] **Schema Migration**: Created [migrate_db.py](file:///d:/2026/college%20pro/hack/api/scratch/migrate_db.py) to automate raw schema script execution on the database (configure DATABASE_URL in `api/.env` and execute).
+- [x] **Private Storage Bucket Setup**: Integrated bucket provisioning via Supabase SDK into [migrate_db.py](file:///d:/2026/college%20pro/hack/api/scratch/migrate_db.py) (configure SUPABASE_URL and SUPABASE_SERVICE_KEY in `api/.env` and execute).
 
 ---
 
@@ -73,7 +73,7 @@ This document acts as the master checklist of all backend features, detailing wh
 
 ## 7. API Routing & Security Middleware
 
-- [ ] **Auth Middleware**: Write JWT authentication middleware verifying Supabase credentials on requests.
+- [x] **Auth Middleware**: Implement JWT authentication and role checking middleware using Supabase token verification in [auth.py](file:///d:/2026/college%20pro/hack/api/utils/auth.py) and integrated into [index.py](file:///d:/2026/college%20pro/hack/api/index.py).
 - [ ] **REST Endpoints**:
   - `POST /api/v1/projects` (Create project, select BYOK key, audit JD, generate Ghost candidate).
   - `POST /api/v1/projects/{id}/resumes` (Batch resume upload endpoint triggering Celery queue tasks).

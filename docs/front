@@ -1,0 +1,233 @@
+now let work on the home page 
+**Every Page — Full UX, Content, Input, Output, Dynamic Behavior**
+
+---
+
+**PAGE 1 — AUTH**
+Routes: `/login` `/signup` -+-
+
+Three routes, one visual shell. The layout never changes — centered card on a white background, logo top, form in the middle.
+
+Inputs: email, password, Google OAuth trigger, magic link trigger. On signup, also: name.
+
+Outputs: JWT access token + refresh token stored in Supabase session. On success, redirects to `/onboarding` if first login, `/` if returning user.
+
+States the page has to handle: loading after form submit, Google OAuth redirect in progress, invalid credentials error, email not verified state, invite token expired, invite token already accepted, rate limited after too many attempts.
+
+Every error is specific. "Wrong password" is not "something went wrong." "This invite expired 3 days ago" is not "invalid link."
+
+---
+
+**PAGE 2 — home**
+Route: `/`
+
+Seven steps. Linear. Cannot be skipped except step 6 and step 7. The page reads from the database on load to know which step the user last completed — if they close the browser and come back, they resume where they left off.
+
+Step 1 reads nothing from the database. It writes: user email + hashed password to Supabase Auth.
+
+Step 2 reads nothing. It writes: org name, industry, size to the organisations table. Also creates the org_members record linking this user as owner.
+
+Step 3 reads: list of providers (Gemini, Claude, OpenAI) from a static config. Writes: encrypted API key to the api_keys table after a live validation call to the provider. If the key fails validation, it tells the user exactly why — 401 means invalid key, 429 means quota exhausted, timeout means network issue.
+
+Step 4 reads: nothing. Writes: first project record to the projects table with status CREATED.
+
+Step 5 reads: the project just created. Writes: JD text to the project. Triggers the JD Audit job in the background. Shows a live status indicator — the audit is running while the user reads the result preview on the right.
+
+Step 6 reads: the JD audit output just generated. Displays it. No user input. The user sees what the system produced from their JD — must-haves extracted, seniority inferred, quality score, ghost candidate card. This is the first moment of value.
+
+Step 7 reads: the project. Accepts file uploads. Writes: resume files to Supabase Storage, candidate records to the candidates table, queues analysis jobs. Can be skipped — redirects to dashboard either way.
+
+On completion: redirects to `/project/:id` for the project just created, not to the dashboard. The recruiter goes straight into their first result.
+
+---
+
+**PAGE 3 — DASHBOARD**
+Route: `/dashboard`
+
+The results hub. Reads everything, writes nothing directly.
+
+On load it queries: all projects belonging to this org, ordered by updated_at descending. For each project it reads: project name, role, status, candidate count, top candidate name and score, qualification rate, average inflation rate, hidden gems count, pool health score.
+
+This is not one query. It is either multiple joined queries or a materialized view depending on performance needs. The frontend receives one API response per page load — not one per project card.
+
+What the page shows:
+
+Top: global org stats — total candidates analyzed across all time, average qualification rate across all projects, active API key status, total projects.
+
+Main body: project result cards in a grid. Each card is a complete summary of one project's intelligence output. Not a navigation element — an information element that happens to be clickable.
+
+Each project card dynamically shows one of four states. State one: CREATED — project exists, no JD uploaded yet. The card shows the role name and a prompt to add a JD. State two: ANALYZING — candidates are being processed. The card shows a live progress indicator — X of Y complete — updated via Supabase Realtime without page refresh. State three: COMPLETE — full results visible on the card directly. Score, qualification rate, inflation rate, top candidate, hidden gems count. State four: FAILED — something broke. The card shows which step failed and a retry option.
+
+The recruiter never has to click into a project to know if it's worth clicking into. The card tells them.
+
+Filters across the top: All, Active, Complete, Archived. These filter the project grid client-side — no new API call.
+
+Sort options: Most recent, Highest pool score, Most candidates, Role name alphabetical.
+
+Search: live text filter across project names and role titles. Client-side. Instant.
+
+New project button: top right corner. Opens a modal — project name, role, department, seniority, API key selection. On submit creates the project record and redirects to `/project/:id`.
+
+The dashboard has no empty state problem after the first project completes. Before the first project, it shows a single centered prompt with a button to create the first project.
+
+Dynamic behavior: any project currently in ANALYZING state updates its progress bar in real time via Supabase Realtime subscription. The recruiter can have the dashboard open while analysis runs elsewhere and watch the card update without touching the browser.
+
+---
+
+**PAGE 4 — PROJECT WORKSPACE**
+Route: `/dashboard/project/:id`
+
+The most complex page. Three distinct phases depending on project state.
+
+On load: reads the project record, its JD audit output, ghost candidate profile, all candidates with their scores and status, and the pool health report if complete.
+
+Phase 1 — JD not uploaded yet. The page shows a large upload zone occupying most of the screen. Paste or file upload. Prominent. Nothing else competes for attention. On submit, the JD audit runs in background. The page transitions to a loading state showing real-time audit progress — what the system is currently doing, in plain language. When the audit completes, the page re-renders to show the JD audit output and the ghost candidate profile side by side. The recruiter can review and edit must-haves before proceeding. An edit here affects the ghost candidate and insider signal checklist.
+
+Phase 2 — JD analyzed, candidates not yet uploaded. The JD audit output is now a collapsed panel at the top — still readable but not dominant. Center of the page is a drag and drop zone for bulk resume upload. The ghost candidate profile card sits in a sidebar. As files are dropped, a file list appears with upload progress per file. Once uploaded, analysis starts automatically.
+
+Phase 3 — Analysis running or complete. This is the primary state the page lives in.
+
+Top band: Pool Health Report. Full width, dark navy background. The numbers that matter most — total applicants, actually qualified, average inflation, hidden gems found, honest candidate rate. These numbers update as analysis completes. If analysis is still running, some of these are partial — they show what's known so far with a note that they'll update.
+
+Below that: weight slider panel. Collapsed by default, expandable. Five sliders, one per scoring dimension. They must sum to 100 — the UI enforces this with normalization. Preset buttons: Founding Engineer, Senior IC, Compliance Role, Growth Hire. Changing any slider re-ranks the candidate list instantly — no API call, pure client-side math using the already-loaded scores.
+
+Below that: ranked candidate list. Cards in a two-column grid. Each card shows rank, name, final score, trajectory label, ghost match score, red flags in plain English, and one line of system narrative — what the resume says versus what the system found. Cards that are still analyzing show the scanner shimmer animation. Cards complete show full output.
+
+Clicking a candidate card goes to `/project/:id/candidate/:cid`.
+
+Export button: top right. Downloads CSV with all scores, flags, questions, narratives for every analyzed candidate.
+
+View Pool Intelligence: link to `/project/:id/pool`.
+
+Real-time behavior: as workers complete candidates during analysis, the list updates. New cards appear in ranked position — not appended to the bottom. The list continuously re-sorts itself as more candidates complete. This is powered by Supabase Realtime watching the candidates table for this project.
+
+---
+
+**PAGE 5 — CANDIDATE DETAIL**
+Route: `/dashboard/project/:id/candidate/:cid`
+
+One candidate. Full intelligence output. Everything the system knows about this person on one screen.
+
+On load: reads the candidate record, all analysis output blobs, the project's ghost candidate profile, the JD audit output. Single API call returns all of this.
+
+Header: candidate name, current title, final score large in JetBrains Mono, rank out of total, trajectory badge, ghost match score, insider signal score.
+
+Left column, 65% width:
+
+Score breakdown — five bars, one per dimension, animated fill on load. Each bar has a label, a score, and a one-line explanation of what drove that score. Not just numbers — the system explains its reasoning for each dimension.
+
+Red flags section — only visible if flags exist. Each flag in plain English. The type of flag, the evidence from the resume, the severity. Not jargon. A recruiter who has never heard of "achievement echo absence" understands what it means when it says "Claims to have led a major ML platform launch in 2022 but received no promotion, title change, or company advancement in the 18 months following."
+
+System narrative — one to three paragraphs. What the resume claims versus what the system actually found. This is the most human-readable output on the page. It reads like a senior recruiter's assessment, because the prompt that generates it asks for exactly that.
+
+Right column, 35% width:
+
+Interrogation Engine — three question cards. Dark navy background, terminal style. Each question shows: the question text, the claim it is probing, what a strong answer looks like, what a weak answer signals. The recruiter walks into the interview with this panel open on their phone.
+
+Ghost Gap Report — what this candidate is missing compared to the ideal. Each gap has a severity label and a specific description. Not "needs more experience" — "No evidence of production incident handling or post-mortem authorship despite 4 years in senior engineering roles."
+
+Insider Signal grid — two columns. Present signals with blue checkmarks. Absent signals with red x marks. Pride flags listed separately with the specific claim and why it's a flag for the seniority level claimed.
+
+Back button returns to the project workspace with scroll position preserved — the recruiter lands back exactly where they were in the candidate list.
+ 
+---
+
+**PAGE 6 — POOL INTELLIGENCE**
+Route: `/dashboard /project/:id/pool`
+
+The meta-report. What the system found about the entire applicant pool — not any individual.
+
+On load: reads the pool_health_report record for this project. Single read. This report is generated once when all candidates complete and stored — it does not recalculate on every page view.
+
+What it shows:
+
+Full-width stat band at the top: total applicants, actually qualified count and percentage, average inflation rate across the pool, most over-claimed skill with evidence, most under-claimed skill, hidden gems count, honest candidate rate.
+
+Distribution charts: score distribution histogram — how the pool clusters. Trajectory distribution — how many Accelerating versus Steady versus Plateaued versus Declining. Inflation distribution — how many low, medium, high inflation candidates.
+
+Hidden gems section: specific candidates who scored low on surface signals but high on insider signals. Named. Linked. The recruiter can click directly to their detail page.
+
+JD warnings: specific language in the job description that is attracting the wrong candidates. The exact sentences from the JD that are causing keyword-matchers to apply. Specific rewrite suggestions.
+
+Market signal: a paragraph the system generates about what this pool says about the talent market for this role right now. Not opinion — observation from the data. "68% of applicants claim ML as a core skill. 11% show evidence consistent with that claim. Either the market is oversaturated with surface-level ML candidates, or the JD language is too generic to filter them."
+
+Pool narrative: a full paragraph summary of what the recruiter should take away from this pool before making any decisions.
+
+Download: one button. Full pool intelligence report as PDF, not just CSV.
+
+---
+
+**PAGE 7 — SETTINGS: GENERAL**
+Route: `/settings`
+
+Reads: current user profile, org details, org plan.
+
+Sections: Profile — name, email, change password. Organisation — name, industry, size, these are editable and write back to the organisations table. Preferences — default model per new project, timezone, email notification toggles.
+
+Notification toggles control: analysis complete, API key health failure, weekly pool summary email, new team member joined. Each toggle writes to a user_preferences table immediately on change — no save button.
+
+---
+
+**PAGE 8 — SETTINGS: API KEYS**
+Route: `/settings/api-keys`
+
+The BYOK management screen.
+
+On load: reads all api_keys records for this org — provider, model, masked key (last 4 chars only), label, status, last used timestamp, last validated timestamp.
+
+What it shows: a list of all connected keys. Each key row shows status dot (blue active, gray inactive, red error), provider icon plus model name, masked key, user label, last used relative time, action buttons — Test, Deactivate, Delete.
+
+Add key flow: button opens a modal. Provider select, model select, key input (masked), label input. On submit: backend validates the key with a live test call. If validation passes, key is encrypted and stored, row appears in the list with active status. If validation fails, specific error shown — never stored.
+
+Test button: sends a fresh validation call against the stored encrypted key. Updates the last validated timestamp. Shows pass or fail with specific reason.
+
+Cost estimate panel: below the key list. Shows estimated cost per candidate analysis for each active key based on the provider's current token pricing. Updates if the model selection changes.
+
+Model switching: each key row has an inline model selector. Changing it writes immediately to the database. Future analyses using this key will use the new model.
+
+---
+
+**PAGE 9 — SETTINGS: TEAM**
+Route: `/settings/team`
+
+Reads: all org_members records for this org — name, email, role, joined date, last active.
+
+Shows: member list table. Each row: avatar initial, name, email, role badge (Owner / Admin / Recruiter / Viewer), joined date, last active relative time, actions (change role, remove — disabled for Owner row).
+
+Invite flow: button opens a modal. Email input, role select. On submit: creates a pending invite record, sends email with signed invite link that expires in 48 hours. Pending invites appear in a separate section below the active members list with a Resend and Cancel option.
+
+Role change: inline dropdown on each row. Writes immediately. Role changes take effect on the next request the affected user makes — their JWT is not invalidated but the DB RLS check picks up the new role.
+
+Remove member: confirmation modal. Writes deletion to org_members. Does not delete their user account — just removes org access.
+
+---
+
+**PAGE 10 — SETTINGS: BILLING**
+Route: `/settings/billing`
+
+Reads: current plan, billing cycle, candidate usage this month versus limit, project count, user count, invoice history.
+
+Shows: current plan card with usage meters. Candidates used this month as a progress bar with number. Projects count. Users count. Each meter turns amber at 80% and red at 95%.
+
+Upgrade flow: plan comparison table inline on the page. Select a higher plan, confirm, redirects to payment. Downgrade shows a warning about which features will be lost and which data will be affected.
+
+Invoice history: table of past invoices with date, amount, plan, status, download PDF link.
+
+BYOK note: persistent reminder that LLM costs are separate and go directly to the user's provider account. Links to the API keys page.
+
+---
+
+**PAGE 11 — SETTINGS: SECURITY**
+Route: `/settings/security`
+
+Reads: all active sessions for this user, full audit log for this org.
+
+Sessions section: list of all active login sessions — device type, browser, IP address (hashed and masked), location approximation, last active time, current session highlighted. Force logout button on each non-current session. Force logout all other sessions button at the top.
+
+Password change: current password, new password, confirm. Writes to Supabase Auth.
+
+Two-factor auth: toggle. If enabled, shows QR code for authenticator app setup. If already enabled, shows backup codes and a disable option.
+
+Audit log: paginated table. Every action that touched data in this org. Timestamp, user who did it, action type, what resource was affected. Filterable by user, by action type, by date range. Exportable as JSON or CSV. Retained for 24 months.
+
+This page exists because of GDPR Article 30 and the EU AI Act audit requirements. It is not decorative. It is the compliance paper trail.
