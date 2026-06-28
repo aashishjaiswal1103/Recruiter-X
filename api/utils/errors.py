@@ -23,3 +23,7 @@ class SchemaValidationError(LLMError):
     def __init__(self, message: str, raw_output: str = None):
         super().__init__(message)
         self.raw_output = raw_output
+
+class ExtractionError(Exception):
+    """Raised when parsing or OCR falls short during resume document extraction."""
+    pass
