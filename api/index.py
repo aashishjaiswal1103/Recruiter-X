@@ -1,3 +1,8 @@
+import sys
+import os
+# Add api directory to python path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 import logging
