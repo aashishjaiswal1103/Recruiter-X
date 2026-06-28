@@ -23,7 +23,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- 1. CUSTOM ENUM TYPES
 -- ==========================================
 
-CREATE TYPE user_role AS ENUM ('owner', 'admin', 'recruiter', 'viewer');
+CREATE TYPE user_role AS ENUM ('owner', 'admin', 'recruiter', 'interviewer', 'viewer');
 CREATE TYPE project_status AS ENUM ('draft', 'auditing', 'active', 'failed', 'complete');
 CREATE TYPE candidate_analysis_status AS ENUM ('pending', 'parsing', 'parsed', 'analyzing', 'complete', 'failed');
 CREATE TYPE job_status AS ENUM ('queued', 'running', 'completed', 'failed');
@@ -216,10 +216,25 @@ CREATE POLICY org_read_policy ON organisations
     FOR SELECT
     USING (auth.is_org_member(id));
 
+-- Organisations: Insert organization if authenticated
+CREATE POLICY org_insert_policy ON organisations
+    FOR INSERT
+    WITH CHECK (auth.uid() IS NOT NULL);
+
 -- Org Members: Read if user belongs to the same org
 CREATE POLICY org_members_policy ON org_members
-    FOR ALL
+    FOR SELECT
     USING (auth.is_org_member(org_id));
+
+-- Org Members: Insert member record for self
+CREATE POLICY org_members_insert_policy ON org_members
+    FOR INSERT
+    WITH CHECK (user_id = auth.uid());
+
+-- Org Members: Write access (Update/Delete) for Owners & Admins
+CREATE POLICY org_members_write_policy ON org_members
+    FOR UPDATE, DELETE
+    USING (auth.is_org_member(org_id) AND auth.has_write_permission(org_id));
 
 -- API Keys: Read access for all org members
 CREATE POLICY api_keys_read_policy ON api_keys
