@@ -181,7 +181,7 @@ ALTER TABLE analysis_jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
 
 -- Helper security function to verify organization membership
-CREATE OR REPLACE FUNCTION auth.is_org_member(org_id UUID)
+CREATE OR REPLACE FUNCTION public.is_org_member(org_id UUID)
 RETURNS BOOLEAN AS $$
 BEGIN
     RETURN EXISTS (
@@ -193,7 +193,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Helper security function to check owner/admin write permissions
-CREATE OR REPLACE FUNCTION auth.has_write_permission(org_id UUID)
+CREATE OR REPLACE FUNCTION public.has_write_permission(org_id UUID)
 RETURNS BOOLEAN AS $$
 DECLARE
     user_role public.user_role;
@@ -214,7 +214,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Organisations: Read organization if a member
 CREATE POLICY org_read_policy ON organisations
     FOR SELECT
-    USING (auth.is_org_member(id));
+    USING (public.is_org_member(id));
 
 -- Organisations: Insert organization if authenticated
 CREATE POLICY org_insert_policy ON organisations
@@ -224,44 +224,49 @@ CREATE POLICY org_insert_policy ON organisations
 -- Org Members: Read if user belongs to the same org
 CREATE POLICY org_members_policy ON org_members
     FOR SELECT
-    USING (auth.is_org_member(org_id));
+    USING (public.is_org_member(org_id));
 
 -- Org Members: Insert member record for self
 CREATE POLICY org_members_insert_policy ON org_members
     FOR INSERT
     WITH CHECK (user_id = auth.uid());
 
--- Org Members: Write access (Update/Delete) for Owners & Admins
-CREATE POLICY org_members_write_policy ON org_members
-    FOR UPDATE, DELETE
-    USING (auth.is_org_member(org_id) AND auth.has_write_permission(org_id));
+-- Org Members: Update access for Owners & Admins
+CREATE POLICY org_members_update_policy ON org_members
+    FOR UPDATE
+    USING (public.is_org_member(org_id) AND public.has_write_permission(org_id));
+
+-- Org Members: Delete access for Owners & Admins
+CREATE POLICY org_members_delete_policy ON org_members
+    FOR DELETE
+    USING (public.is_org_member(org_id) AND public.has_write_permission(org_id));
 
 -- API Keys: Read access for all org members
 CREATE POLICY api_keys_read_policy ON api_keys
     FOR SELECT
-    USING (auth.is_org_member(org_id));
+    USING (public.is_org_member(org_id));
 
 -- API Keys: Write access for Owners & Admins only
 CREATE POLICY api_keys_write_policy ON api_keys
     FOR ALL
-    USING (auth.is_org_member(org_id) AND auth.has_write_permission(org_id));
+    USING (public.is_org_member(org_id) AND public.has_write_permission(org_id));
 
 -- Projects: All-operations tenant isolation
 CREATE POLICY projects_policy ON projects
     FOR ALL
-    USING (auth.is_org_member(org_id));
+    USING (public.is_org_member(org_id));
 
 -- Candidates: All-operations tenant isolation
 CREATE POLICY candidates_policy ON candidates
     FOR ALL
-    USING (auth.is_org_member(org_id));
+    USING (public.is_org_member(org_id));
 
 -- Analysis Jobs: All-operations tenant isolation
 CREATE POLICY analysis_jobs_policy ON analysis_jobs
     FOR ALL
-    USING (auth.is_org_member(org_id));
+    USING (public.is_org_member(org_id));
 
 -- Audit Logs: All-operations tenant isolation
 CREATE POLICY audit_logs_policy ON audit_logs
     FOR ALL
-    USING (auth.is_org_member(org_id));
+    USING (public.is_org_member(org_id));
