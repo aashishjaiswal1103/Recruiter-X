@@ -151,7 +151,10 @@ export default function LandingSandbox() {
     let currentLogIndex = 0;
     const interval = setInterval(() => {
       if (currentLogIndex < sample.logs.length) {
-        setStreamedLogs(prev => [...prev, sample.logs[currentLogIndex]]);
+        const nextLog = sample.logs[currentLogIndex];
+        if (nextLog) {
+          setStreamedLogs(prev => [...prev, nextLog]);
+        }
         currentLogIndex++;
       } else {
         clearInterval(interval);
@@ -168,76 +171,76 @@ export default function LandingSandbox() {
   }, [activeSample]);
 
   return (
-    <div className="w-full rounded-md border border-[#0000FF] bg-white text-[#0A0A0A] shadow-md overflow-hidden font-mono text-sm max-w-4xl mx-auto">
+    <div className="w-full rounded-2xl bg-[#090916] text-white shadow-2xl overflow-hidden font-data text-sm max-w-4xl mx-auto border border-white/5">
       {/* OS Bar */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-[#E5E5E5] bg-[#FAFAFA]">
-        <div className="flex space-x-2">
-          <div className="w-3 h-3 rounded-full bg-red-500/10 border border-red-600/30" />
-          <div className="w-3 h-3 rounded-full bg-yellow-500/10 border border-yellow-600/30" />
-          <div className="w-3 h-3 rounded-full bg-[#0000FF]/10 border border-[#0000FF]/30" />
+      <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-[#121226]">
+        <div className="flex space-x-1.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
+          <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
+          <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
         </div>
-        <div className="text-[#8C8C8C] text-xs font-mono select-none">
-          JD_AUDIT_ENGINE_v2.0
+        <div className="text-white/40 text-xs font-data select-none tracking-wider uppercase">
+          JD Audit Console
         </div>
         <div className="flex space-x-2">
           <button 
             onClick={() => !isAnalyzing && setActiveSample('ml')}
             disabled={isAnalyzing}
-            className={`px-2 py-0.5 text-xs rounded border transition-all font-bold ${activeSample === 'ml' ? 'border-[#0000FF] bg-[#F0F4FF] text-[#0000FF]' : 'border-[#E5E5E5] text-[#4A4A4A] hover:text-[#0A0A0A]'} ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`px-2.5 py-0.5 text-xs rounded-full border transition-all font-bold ${activeSample === 'ml' ? 'border-blue-light/50 bg-blue/20 text-blue-light' : 'border-white/5 text-white/50 hover:text-white'} ${isAnalyzing ? 'opacity-30 cursor-not-allowed' : ''}`}
           >
-            ML_ENG.JD
+            ml_eng.jd
           </button>
           <button 
             onClick={() => !isAnalyzing && setActiveSample('frontend')}
             disabled={isAnalyzing}
-            className={`px-2 py-0.5 text-xs rounded border transition-all font-bold ${activeSample === 'frontend' ? 'border-[#0000FF] bg-[#F0F4FF] text-[#0000FF]' : 'border-[#E5E5E5] text-[#4A4A4A] hover:text-[#0A0A0A]'} ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`px-2.5 py-0.5 text-xs rounded-full border transition-all font-bold ${activeSample === 'frontend' ? 'border-blue-light/50 bg-blue/20 text-blue-light' : 'border-white/5 text-white/50 hover:text-white'} ${isAnalyzing ? 'opacity-30 cursor-not-allowed' : ''}`}
           >
-            FRONTEND.JD
+            frontend.jd
           </button>
         </div>
       </div>
 
       {/* Code Tabs */}
-      <div className="flex border-b border-[#E5E5E5] bg-[#FAFAFA] text-xs">
+      <div className="flex border-b border-white/10 bg-[#0B0B1E] text-xs">
         <button
           onClick={() => !isAnalyzing && setActiveTab('input')}
           disabled={isAnalyzing}
-          className={`px-4 py-2 border-r border-[#E5E5E5] flex items-center gap-1.5 transition-all font-bold ${
+          className={`px-5 py-3 border-r border-white/10 flex items-center gap-1.5 transition-all font-bold ${
             activeTab === 'input' 
-              ? 'bg-white text-[#0000FF] border-b-2 border-b-[#0000FF]' 
-              : 'text-[#4A4A4A] hover:bg-[#FAFAFA]/50'
-          } ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              ? 'bg-[#121226] text-blue-light border-b-2 border-b-blue-light' 
+              : 'text-white/40 hover:bg-white/5'
+          } ${isAnalyzing ? 'opacity-30 cursor-not-allowed' : ''}`}
         >
           <span>INPUT_JD</span>
         </button>
         <button
           onClick={() => setActiveTab('log')}
-          className={`px-4 py-2 border-r border-[#E5E5E5] flex items-center gap-1.5 transition-all font-bold ${
+          className={`px-5 py-3 border-r border-white/10 flex items-center gap-1.5 transition-all font-bold ${
             activeTab === 'log' 
-              ? 'bg-white text-[#0000FF] border-b-2 border-b-[#0000FF]' 
-              : 'text-[#4A4A4A] hover:bg-[#FAFAFA]/50'
+              ? 'bg-[#121226] text-blue-light border-b-2 border-b-blue-light' 
+              : 'text-white/40 hover:bg-white/5'
           }`}
         >
           <span>AUDIT_LOG</span>
           {isAnalyzing && (
-            <span className="w-1.5 h-1.5 rounded-full bg-[#0000FF] animate-ping" />
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-light animate-ping" />
           )}
         </button>
         <button
           onClick={() => !isAnalyzing && setActiveTab('json')}
           disabled={isAnalyzing}
-          className={`px-4 py-2 border-r border-[#E5E5E5] flex items-center gap-1.5 transition-all font-bold ${
+          className={`px-5 py-3 border-r border-white/10 flex items-center gap-1.5 transition-all font-bold ${
             activeTab === 'json' 
-              ? 'bg-white text-[#0000FF] border-b-2 border-b-[#0000FF]' 
-              : 'text-[#4A4A4A] hover:bg-[#FAFAFA]/50'
-          } ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              ? 'bg-[#121226] text-blue-light border-b-2 border-b-blue-light' 
+              : 'text-white/40 hover:bg-white/5'
+          } ${isAnalyzing ? 'opacity-30 cursor-not-allowed' : ''}`}
         >
           <span>OUTPUT_JSON</span>
         </button>
       </div>
 
       {/* Main Terminal Body */}
-      <div className="relative h-96 p-4 overflow-hidden bg-white flex flex-col justify-between">
+      <div className="relative h-96 p-5 overflow-hidden bg-[#070716] flex flex-col justify-between">
         {/* Tab Content */}
         <div className="flex-1 overflow-auto">
           {activeTab === 'input' && (
@@ -245,58 +248,59 @@ export default function LandingSandbox() {
               <textarea
                 value={sample.rawText}
                 readOnly
-                className="w-full flex-1 bg-transparent border-0 text-[#4A4A4A] resize-none font-mono text-sm leading-relaxed focus:outline-none"
+                className="w-full flex-1 bg-transparent border-0 text-white/70 resize-none font-mono text-sm leading-relaxed focus:outline-none"
               />
-              <div className="pt-4 border-t border-[#E5E5E5] flex justify-between items-center text-xs text-[#8C8C8C]">
+              <div className="pt-4 border-t border-white/10 flex justify-between items-center text-xs text-white/30">
                 <span>UTF-8 • SPACE_MONO</span>
                 <button
                   onClick={runAuditSimulation}
                   disabled={isAnalyzing}
-                  className="bg-[#0000FF] hover:bg-[#0000CC] text-white px-4 py-2 rounded font-bold tracking-wide transition-all uppercase select-none flex items-center gap-2"
+                  className="btn-cta !h-9 !text-xs !px-5 select-none"
                 >
-                  <span>RUN JD AUDIT</span>
-                  <span className="text-[10px] bg-white/20 px-1 py-0.5 rounded">⌘ENTER</span>
+                  <span>Run JD Audit</span>
+                  <span className="text-[9px] bg-white/20 px-1 py-0.5 rounded-md ml-1.5">⌘Enter</span>
                 </button>
               </div>
             </div>
           )}
 
           {activeTab === 'log' && (
-            <div ref={logContainerRef} className="h-full overflow-y-auto space-y-2 select-text pr-2">
+            <div ref={logContainerRef} className="h-full overflow-y-auto space-y-2 select-text pr-2 font-mono">
               {streamedLogs.map((log, idx) => {
-                let colorClass = 'text-[#4A4A4A]';
-                if (log.startsWith('[SYSTEM]')) colorClass = 'text-[#8C8C8C]';
+                if (!log) return null;
+                let colorClass = 'text-white/75';
+                if (log.startsWith('[SYSTEM]')) colorClass = 'text-white/30';
                 if (log.startsWith('[AUDIT]')) {
                   if (log.includes('Mismatch') || log.includes('Flagged')) {
-                    colorClass = 'text-[#B45309]';
+                    colorClass = 'text-amber-400';
                   } else {
-                    colorClass = 'text-[#0000FF]';
+                    colorClass = 'text-blue-light';
                   }
                 }
-                if (log.startsWith('[GHOST]')) colorClass = 'text-[#0000FF] font-bold';
+                if (log.startsWith('[GHOST]')) colorClass = 'text-blue-light font-bold';
                 
                 return (
-                  <div key={idx} className={`leading-relaxed text-xs md:text-sm font-mono ${colorClass}`}>
+                  <div key={idx} className={`leading-relaxed text-xs md:text-sm ${colorClass}`}>
                     {log}
                   </div>
                 );
               })}
               
               {isAnalyzing && (
-                <div className="flex items-center gap-2 text-[#8C8C8C] text-xs">
-                  <span className="w-1.5 h-4 bg-[#0000FF] animate-pulse" />
-                  <span>Processing layers in parallel via Celery workers...</span>
+                <div className="flex items-center gap-2 text-white/40 text-xs">
+                  <span className="w-1.5 h-4 bg-blue-light animate-pulse" />
+                  <span>Processing layers in parallel...</span>
                 </div>
               )}
 
               {!isAnalyzing && streamedLogs.length === 0 && (
-                <div className="h-full flex flex-col items-center justify-center text-[#8C8C8C] space-y-2 py-16">
-                  <div className="text-center font-mono">CONSOLE IDLE</div>
+                <div className="h-full flex flex-col items-center justify-center text-white/30 space-y-3 py-16">
+                  <div className="text-center font-data text-xs uppercase tracking-wider">Console Idle</div>
                   <button 
                     onClick={runAuditSimulation}
-                    className="border border-[#0000FF] bg-[#F0F4FF] text-[#0000FF] font-bold px-4 py-2 rounded hover:bg-[#F0F4FF]/70 transition-all text-xs uppercase"
+                    className="btn-cta !h-9 !text-xs !px-5"
                   >
-                    RUN ANALYSIS SIMULATION
+                    Run Analysis Simulation
                   </button>
                 </div>
               )}
@@ -304,7 +308,7 @@ export default function LandingSandbox() {
           )}
 
           {activeTab === 'json' && (
-            <div className="h-full overflow-y-auto text-xs text-[#0000FF] select-text pr-2 font-mono">
+            <div className="h-full overflow-y-auto text-xs text-blue-light select-text pr-2 font-mono">
               <pre className="whitespace-pre-wrap leading-relaxed">
                 {JSON.stringify(sample.jsonOutput, null, 2)}
               </pre>
@@ -312,8 +316,8 @@ export default function LandingSandbox() {
           )}
         </div>
 
-        {/* Scan lines / Grid effect */}
-        <div className="absolute inset-0 pointer-events-none opacity-5 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.05)_50%)] bg-[length:100%_4px]" />
+        {/* Subtle grid overlay */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.02] bg-[linear-gradient(rgba(0,0,255,0)_50%,rgba(0,0,255,0.05)_50%)] bg-[length:100%_4px]" />
       </div>
     </div>
   );
