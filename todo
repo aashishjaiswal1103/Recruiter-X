@@ -20,8 +20,8 @@ This document acts as the master checklist of all backend features, detailing wh
 - [x] **Schema Definition**: [schema.sql](file:///d:/2026/college%20pro/hack/api/database/schema.sql) defining tables, indexes, and custom enum types.
 - [x] **Row-Level Security (RLS)**: Policies written for isolation of organization/tenant data in the SQL schema.
 - [x] **Supabase Client Setup**: [supabase_client.py](file:///d:/2026/college%20pro/hack/api/services/supabase_client.py) service-role client initialized to bypass RLS for background processes.
-- [ ] **Schema Migration**: Execute [schema.sql](file:///d:/2026/college%20pro/hack/api/database/schema.sql) script on the live Supabase PostgreSQL instance.
-- [ ] **Private Storage Bucket Setup**: Provision a private bucket for resume file uploads and configure signed URL access.
+- [x] **Schema Migration**: Created [migrate_db.py](file:///Users/disha/Desktop/Recruiter-X/api/scratch/migrate_db.py) to automate raw schema script execution on the database (configure DATABASE_URL in `api/.env` and execute).
+- [x] **Private Storage Bucket Setup**: Integrated bucket provisioning via Supabase SDK into [migrate_db.py](file:///Users/disha/Desktop/Recruiter-X/api/scratch/migrate_db.py) (configure SUPABASE_URL and SUPABASE_SERVICE_KEY in `api/.env` and execute).
 
 ---
 

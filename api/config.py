@@ -12,6 +12,7 @@ class Settings(BaseModel):
     SUPABASE_URL: str = Field(default_factory=lambda: os.getenv("SUPABASE_URL", ""))
     SUPABASE_SERVICE_KEY: str = Field(default_factory=lambda: os.getenv("SUPABASE_SERVICE_KEY", ""))
     SUPABASE_JWT_SECRET: str = Field(default_factory=lambda: os.getenv("SUPABASE_JWT_SECRET", ""))
+    DATABASE_URL: str = Field(default_factory=lambda: os.getenv("DATABASE_URL", ""))
     
     # Redis Cache and Queue Configurations
     REDIS_URL: str = Field(default_factory=lambda: os.getenv("REDIS_URL", "redis://localhost:6379"))
