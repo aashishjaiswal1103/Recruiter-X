@@ -1,5 +1,11 @@
 import os
+import sys
 from celery import Celery
+
+# Add api directory to python path for Celery imports
+api_dir = os.path.dirname(os.path.abspath(__file__))
+if api_dir not in sys.path:
+    sys.path.append(api_dir)
 
 # Load Redis URL from environment variables, defaulting to local redis
 redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379")
@@ -9,6 +15,11 @@ app = Celery(
     broker=redis_url,
     backend=redis_url,
 )
+
+# Register task modules dynamically
+import tasks.parse
+import tasks.analyze
+import tasks.report
 
 app.conf.update(
     task_serializer='json',

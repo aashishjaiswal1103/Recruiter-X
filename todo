@@ -63,11 +63,11 @@ This document acts as the master checklist of all backend features, detailing wh
 
 ## 6. Pending Pipelines & Business Logic
 
-- [ ] **Resume Ingestion Pipeline**: Implement document text extraction parsing for `.pdf` (using `pdfplumber`), `.docx` (using `python-docx`), and scanned image fallback OCR (`pytesseract`).
-- [ ] **BYOK Key Management**: Write AES-256-GCM encryption/decryption utilities using PyCryptodome (or cryptography) to securely store LLM API keys in the database.
-- [ ] **Celery Tasks Execution**: Wrap parsing, evaluations, and reports into asynchronous tasks. The `workers/` directory is currently empty.
-- [ ] **Score Fusion & Ranking Engine**: Write mathematical scoring script applying slider weight presets, subtracting penalties for red flags, and performing the diversity reshuffle.
-- [ ] **Pool Health Aggregator**: Write aggregation script to generate cohort metadata (average inflation, top missing skills, qualification rate) once all candidates are processed.
+- [x] **Resume Ingestion Pipeline**: Document text extraction parsing for `.pdf` and `.docx` with scanned image fallback OCR (`pypdfium2` and `pytesseract`).
+- [x] **BYOK Key Management**: AES-256-GCM encryption/decryption utilities using cryptography and HKDF org key derivation.
+- [x] **Celery Tasks Execution**: Asynchronous parsing, evaluations, and cohort reporting tasks fully integrated into worker queue routing.
+- [x] **Score Fusion & Ranking Engine**: Core scoring mathematics applying slider weights/presets, flag penalties, and diversity-reshuffling pass.
+- [x] **Pool Health Aggregator**: Statistics compilation, qualifications estimation, over/under-claimed skill checklists, hidden gems, and LLM pool narrative builder.
 
 ---
 
