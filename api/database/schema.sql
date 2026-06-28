@@ -211,10 +211,14 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Policy Bindings
 -- ------------------------------------------
 
--- Organisations: Read organization if a member
+-- Organisations: Read organization if a member, or if it was just created and has no members yet
 CREATE POLICY org_read_policy ON organisations
     FOR SELECT
-    USING (public.is_org_member(id));
+    USING (
+        public.is_org_member(id) 
+        OR 
+        NOT EXISTS (SELECT 1 FROM public.org_members WHERE org_members.org_id = organisations.id)
+    );
 
 -- Organisations: Insert organization if authenticated
 CREATE POLICY org_insert_policy ON organisations
