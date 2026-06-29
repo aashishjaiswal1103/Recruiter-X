@@ -43,7 +43,7 @@ export default function LoginPage() {
         if (orgError || !orgs || orgs.length === 0) {
           router.push('/org-selection');
         } else {
-          router.push('/dashboard');
+          router.push('/');
         }
       }
     } catch (err: any) {

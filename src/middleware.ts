@@ -60,7 +60,7 @@ export async function middleware(request: NextRequest) {
   if (user && isAuthRoute) {
     // Verify if organization membership exists via metadata or redirect to org-selection
     const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
+    url.pathname = '/'
     return NextResponse.redirect(url)
   }
 

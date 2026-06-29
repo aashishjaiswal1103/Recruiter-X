@@ -1,5 +1,5 @@
-import DashboardDemo from '@/components/DashboardDemo';
+import DashboardPage from '@/components/dashboard/DashboardPage';
 
-export default function DashboardPage() {
-  return <DashboardDemo />;
+export default function Dashboard() {
+  return <DashboardPage />;
 }
